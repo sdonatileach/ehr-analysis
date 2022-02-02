@@ -1,7 +1,7 @@
 """Data Structures:
 
-Each of the following data structures is a dictionary where the keys are column 
-where the keys are each of the column headers, and the dictionary values are each of the
+Each of the following data structures is a dictionary where the keys 
+are each of the column headers, and the dictionary values are each of the
 corresponding column values in the form of a list of lists.
     
 

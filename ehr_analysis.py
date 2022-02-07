@@ -14,10 +14,10 @@ Second, we needed to be able to index and iterate over the list of lists
 in the other two functions."""
 
 import datetime
-from operator import contains
+from typing import Dict, Union
 
 
-def parse_data(filename: str, delimiter: str) -> dict:
+def parse_data(filename: str, delimiter: str) -> Dict[str, Union[str, float]]:
     """Read and parse the data files. Return a dictionary.
 
     Assumptions:
@@ -61,7 +61,7 @@ def parse_data(filename: str, delimiter: str) -> dict:
         return data_dict
 
 
-def num_older_than(age: float, patient_dict: dict) -> int:
+def num_older_than(age: float, patient_dict: Dict[str, Union[str, float]]) -> int:
     """Return the number of patients older than a given age (in years).
 
     Assumptions:
@@ -98,7 +98,7 @@ def num_older_than(age: float, patient_dict: dict) -> int:
     return len(older)
 
 
-def sick_patients(lab: str, gt_lt: str, value: float, lab_dict: dict) -> list:
+def sick_patients(lab: str, gt_lt: str, value: float, lab_dict: Dict[str, Union[str, float]]) -> list:
     """Return a (unique) list of patients who have a given test with value
     above (">") or below ("<") a given level.
 
@@ -127,17 +127,12 @@ def sick_patients(lab: str, gt_lt: str, value: float, lab_dict: dict) -> list:
                     if lab_dict["LabValue"][i] > str(value):
                         if lab_dict["PatientID"][i] not in values:
                             values.append(lab_dict["PatientID"][i])
-                            pass
-                        pass
-                    pass
                 elif gt_lt == "<":
                     if lab_dict["LabValue"][i] < str(value):
                         if lab_dict["PatientID"][i] not in values:
                             values.append(lab_dict["PatientID"][i])
-                        pass
-                    pass
-                pass
-
+                else:
+                    raise ValueError("Please enter a valid operator")
     return values
 
 
@@ -145,10 +140,10 @@ if __name__ == "__main__":
     patient_dict = parse_data(
         "/mnt/c/Users/sdona/Documents/Duke/22Spring"
         "/821BIOSTAT/03Assignment/PatientCorePopulatedTable.txt"
-    )
+    , "\t")
     lab_dict = parse_data(
         "/mnt/c/Users/sdona/Documents/Duke/22Spring"
         "/821BIOSTAT/03Assignment/LabsCorePopulatedTable.txt"
-    )
+    , "\t")
     print(num_older_than(50, patient_dict))
     print(sick_patients("METABOLIC: ALBUMIN", ">", 5.9, lab_dict))

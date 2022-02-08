@@ -61,6 +61,14 @@ def parse_data(filename: str, delimiter: str) -> Dict[str, Union[str, float]]:
         return data_dict
 
 
+def date_time(x:str):
+    date = []
+    for i in x:
+        date.append(datetime.datetime.strptime(i, "%Y-%m-%d %H:%M:%S.%f"))
+    return date
+
+
+
 def num_older_than(age: float, patient_dict: Dict[str, Union[str, float]]) -> int:
     """Return the number of patients older than a given age (in years).
 
@@ -81,19 +89,18 @@ def num_older_than(age: float, patient_dict: Dict[str, Union[str, float]]) -> in
     O(2N+N+3N) and after dropping the constant factor, we yield O(N) complexity.
     """
 
-    dates = patient_dict["PatientDateOfBirth"]
-    dates_2 = [datetime.datetime.strptime(i, "%Y-%m-%d %H:%M:%S.%f") for i in dates]
     today = datetime.datetime.today()
     age_days = []
     age_years = []
-    for i in range(len(dates_2)):
-        age_days.append(today - dates_2[i])
+    brth_date = date_time(patient_dict["PatientDateOfBirth"])
+    for i in range(len(brth_date)):
+        age_days.append(today - brth_date[i])
         age_years.append(age_days[i].days / 365.25)
-    patient_dict["PatientDateOfBirth"] = age_years
+    patient_dict["PatientAge"] = age_years
 
     older = []
-    for i in range(len(patient_dict["PatientDateOfBirth"])):
-        if patient_dict["PatientDateOfBirth"][i] > age:
+    for i in range(len(patient_dict["PatientAge"])):
+        if patient_dict["PatientAge"][i] > age:
             older.append(patient_dict["PatientID"][i])
     return len(older)
 
@@ -110,30 +117,51 @@ def sick_patients(lab: str, gt_lt: str, value: float, lab_dict: Dict[str, Union[
 
     Computational Complexity: this function start with an empty list which is
     constant time. Then we iterate over the length of the "lab_dict" list, which
-    takes N time, which is followed by another iteration over all the items of the
-    dictionary.  Therefore, we have N**2 time complexity.  The next four if
-    statements followed by appending to the "values" list all take constant time,
-    but each operation need to be repeated for each N, because we are inside the for loops,
-    resulting in 5N.  We repeat a similar process in the elif operation which adds an
-    additional 4N to the total. Our big-O notation is therefore O(N**2+5N+4N)
-    and after dropping the constant factor, we yield O(N**2) complexity.
+    takes N time.  The next four if statements followed by appending to the 
+    "values" list all take constant time, but each operation need to be repeated 
+    for each N, because we are inside the for loops, resulting in 5N.  
+    We repeat a similar process in the elif operation which adds an
+    additional 4N to the total. Our big-O notation is therefore O(N+5N+4N)
+    and after dropping the constant factor, we yield O(N) complexity.
     """
 
     values = []
     for i in range(len(lab_dict["PatientID"])):
-        for (key, value_pair) in lab_dict.items():
-            if value_pair[i] == lab:
-                if gt_lt == ">":
-                    if lab_dict["LabValue"][i] > str(value):
-                        if lab_dict["PatientID"][i] not in values:
-                            values.append(lab_dict["PatientID"][i])
-                elif gt_lt == "<":
-                    if lab_dict["LabValue"][i] < str(value):
-                        if lab_dict["PatientID"][i] not in values:
-                            values.append(lab_dict["PatientID"][i])
-                else:
-                    raise ValueError("Please enter a valid operator")
-    return values
+        if lab_dict["LabName"][i] == lab:
+            if gt_lt == ">":
+                if lab_dict["LabValue"][i] > str(value):
+                    if lab_dict["PatientID"][i] not in values:
+                        values.append(lab_dict["PatientID"][i])
+            elif gt_lt == "<":
+                if lab_dict["LabValue"][i] < str(value):
+                    if lab_dict["PatientID"][i] not in values:
+                        values.append(lab_dict["PatientID"][i])
+            else:
+                raise ValueError("Please enter a valid operator")
+    print(len(values))
+
+
+def age_at_admis(patient_id:str) -> float:
+    age_days = []
+    age_years = []
+    admis_date = date_time(lab_dict["LabDateTime"])
+    brth_date = date_time(patient_dict["PatientDateOfBirth"])
+    for i in range(len(admis_date)):
+        for j in range(len(brth_date)):
+            if lab_dict["PatientID"][i] == patient_dict["PatientID"][j]:
+                age_days.append(admis_date[i] - brth_date[j])
+                age_years.append(age_days[i].days/365.25)
+            lab_dict["PatientAgeAtAdmission"] = age_years
+    
+    first_admis = datetime.datetime.today()
+    for i in range(len(lab_dict["PatientID"])):
+        if lab_dict["PatientID"][i] == patient_id:
+            if admis_date[i] < first_admis:
+                first_admis = admis_date[i]
+    for i in range(len(lab_dict["PatientID"])):
+        if first_admis == admis_date[i]:
+            return(lab_dict["PatientAgeAtAdmission"][i])
+
 
 
 if __name__ == "__main__":
@@ -145,5 +173,6 @@ if __name__ == "__main__":
         "/mnt/c/Users/sdona/Documents/Duke/22Spring"
         "/821BIOSTAT/03Assignment/LabsCorePopulatedTable.txt"
     , "\t")
-    print(num_older_than(50, patient_dict))
-    print(sick_patients("METABOLIC: ALBUMIN", ">", 5.9, lab_dict))
+    # print(num_older_than(52, patient_dict))
+    # print(sick_patients("METABOLIC: ALBUMIN", ">", 5.9, lab_dict))
+    print(age_at_admis("03A481F5-B32A-4A91-BD42-43EB78FEBA77"))

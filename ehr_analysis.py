@@ -17,8 +17,9 @@ import datetime
 from typing import Dict, Union
 
 
-def parse_data(filename: str, delimiter: str) -> Dict[str, Union[str, float]]:
-    """Read and parse the data files. Return a dictionary.
+def parse_data(filename: str, delimiter: str):
+    """Read and parse the data files. Writes a dictionary as a txt file 
+    to current directory.
 
     Assumptions:
     - the first row of the file contains the column headers
@@ -32,8 +33,8 @@ def parse_data(filename: str, delimiter: str) -> Dict[str, Union[str, float]]:
     the "records" list occurs N-1 times.  Finally, creating the empty
     dictionary takes constant time, and then we begin to iterate over the length of
     the columns and within that the length of the rows, which takes N^2 time.
-    Our big-O notation is therefore O(N**2+(N-1)+3N) and after dropping the constant factor,
-    we yield O(N**2) complexity.
+    Our big-O notation is therefore O(N**2+(N-1)+3N) and after dropping the constant 
+    factor, we yield O(N**2) complexity.
     """
     with open(filename, "r", encoding="UTF-8-sig") as file:
         data = file.readlines()
@@ -59,7 +60,19 @@ def parse_data(filename: str, delimiter: str) -> Dict[str, Union[str, float]]:
             data_dict[columns[0][i]] = values
 
         return data_dict
+        
+        # if "PatientCorePopulatedTable" in filename:
+        #     with open("Patients.txt",'w') as data: 
+        #         data.write(str(data_dict))
+        
+        # if "LabsCorePopulatedTable" in filename:
+        #     with open("Labs.txt",'w') as data: 
+        #         data.write(str(data_dict))
 
+# def create_data_dict(filename: str) -> Dict[str, Union[str, float]]:
+#     with open(filename) as file:
+#         data_dict = eval(file.read())
+#     return data_dict
 
 def date_time(x:str):
     date = []
@@ -70,7 +83,7 @@ def date_time(x:str):
 
 
 def num_older_than(age: float, patient_dict: Dict[str, Union[str, float]]) -> int:
-    """Return the number of patients older than a given age (in years).
+    """Returns the number of patients older than a given age (in years).
 
     Assumptions:
     - the user will pass the output of "parse_data" into this function
@@ -82,11 +95,12 @@ def num_older_than(age: float, patient_dict: Dict[str, Union[str, float]]) -> in
     and then we iterate over the length of the object, which takes N time, to
     get the date in the format we need. Creating the "today" object takes constant time.
     The operation of appending to lists takes constant time, but this occurs 2N times;
-    once for the "age_days" list, and once for the "age_years" list. Moving on to the next
-    step, we iterate over the length of the "patient_dict" list, which takes N time.
-    The if statement happens N times as well because it is inside this loop, giving us 2N.
-    Finally, we append to the "older" list N times, resulting in 3N.  Our big-O notation is therefore
-    O(2N+N+3N) and after dropping the constant factor, we yield O(N) complexity.
+    once for the "age_days" list, and once for the "age_years" list. Moving on to the 
+    next step, we iterate over the length of the "patient_dict" list, which takes N 
+    time. The if statement happens N times as well because it is inside this loop, 
+    giving us 2N. Finally, we append to the "older" list N times, resulting in 3N.  
+    Our big-O notation is therefore O(2N+N+3N) and after dropping the constant factor,
+    we yield O(N) complexity.
     """
 
     today = datetime.datetime.today()
@@ -106,7 +120,7 @@ def num_older_than(age: float, patient_dict: Dict[str, Union[str, float]]) -> in
 
 
 def sick_patients(lab: str, gt_lt: str, value: float, lab_dict: Dict[str, Union[str, float]]) -> list:
-    """Return a (unique) list of patients who have a given test with value
+    """Returns a (unique) list of patients who have a given test with value
     above (">") or below ("<") a given level.
 
     Assumptions:
@@ -126,6 +140,8 @@ def sick_patients(lab: str, gt_lt: str, value: float, lab_dict: Dict[str, Union[
     """
 
     values = []
+    if lab not in set(lab_dict["LabName"]):
+        raise ValueError("Please enter a valid lab name")
     for i in range(len(lab_dict["PatientID"])):
         if lab_dict["LabName"][i] == lab:
             if gt_lt == ">":
@@ -138,10 +154,11 @@ def sick_patients(lab: str, gt_lt: str, value: float, lab_dict: Dict[str, Union[
                         values.append(lab_dict["PatientID"][i])
             else:
                 raise ValueError("Please enter a valid operator")
-    print(len(values))
+    return values
 
 
-def age_at_admis(patient_id:str) -> float:
+def age_at_admis(patient_id:str, lab_dict:Dict[str, Union[str, float]], 
+    patient_dict:Dict[str, Union[str, float]]) -> float:
     age_days = []
     age_years = []
     admis_date = date_time(lab_dict["LabDateTime"])
@@ -160,19 +177,23 @@ def age_at_admis(patient_id:str) -> float:
                 first_admis = admis_date[i]
     for i in range(len(lab_dict["PatientID"])):
         if first_admis == admis_date[i]:
-            return(lab_dict["PatientAgeAtAdmission"][i])
+            age = lab_dict["PatientAgeAtAdmission"][i]
+            return round(age, 2)
 
 
 
 if __name__ == "__main__":
-    patient_dict = parse_data(
-        "/mnt/c/Users/sdona/Documents/Duke/22Spring"
-        "/821BIOSTAT/03Assignment/PatientCorePopulatedTable.txt"
+    parse_data(
+        "LabsCorePopulatedTable.txt"
     , "\t")
-    lab_dict = parse_data(
-        "/mnt/c/Users/sdona/Documents/Duke/22Spring"
-        "/821BIOSTAT/03Assignment/LabsCorePopulatedTable.txt"
+    parse_data(
+        "PatientCorePopulatedTable.txt"
     , "\t")
+    # patient_dict = create_data_dict("Patients.txt")
+    # lab_dict = create_data_dict("Labs.txt")
     # print(num_older_than(52, patient_dict))
-    # print(sick_patients("METABOLIC: ALBUMIN", ">", 5.9, lab_dict))
-    print(age_at_admis("03A481F5-B32A-4A91-BD42-43EB78FEBA77"))
+    # print(len(sick_patients("METABOLIC: ALBUMIN", ">", 5.9, lab_dict)))
+    # print(sick_patients(lab="URINALYSIS: WHITE BLOOD CELLS", 
+    # gt_lt ="<", value=.5, lab_dict=lab_dict))
+    # print(sick_patients(lab="hello", gt_lt=">", value=5, lab_dict=lab_dict))
+    print(age_at_admis("03A481F5-B32A-4A91-BD42-43EB78FEBA77",lab_dict,patient_dict))

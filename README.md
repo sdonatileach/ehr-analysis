@@ -24,8 +24,11 @@ Return the age at first admission of any given patient.
 ## Execute functions
 1. Open ehr_analysis.py
 2. Uncomment and use lines below "if \_\_name\_\_=="\_\_main\_\_":
-  1. fill in all __ with valid values
-  2. ValueError will appear if value entered is not valid
+  1. fill in all __ with valid values4
+  2.  ValueError will appear if value entered is not valid
+
+## Testing Instructions
+  1. In the command line, type "pytest test_ehr.py --cov"
 
 ### Examples
     ```
@@ -39,39 +42,39 @@ Return the age at first admission of any given patient.
     print(age_at_admis(patient_id="03A481F5-B32A-4A91-BD42-43EB78FEBA77", lab_dict=lab_dict, patient_dict=patient_dict)))
     ```
     
-Valid lab values for sick_patients():
-- 'CBC: ABSOLUTE LYMPHOCYTES'
-- 'CBC: ABSOLUTE NEUTROPHILS'
-- 'CBC: BASOPHILS'
-- 'CBC: EOSINOPHILS'
-- 'CBC: HEMATOCRIT'
-- 'CBC: HEMOGLOBIN'
-- 'CBC: LYMPHOCYTES'
-- 'CBC: MCH'
-- 'CBC: MCHC'
-- 'CBC: MEAN CORPUSCULAR VOLUME'
-- 'CBC: MONOCYTES'
-- 'CBC: NEUTROPHILS'
-- 'CBC: PLATELET COUNT'
-- 'CBC: RDW'
-- 'CBC: RED BLOOD CELL COUNT'
-- 'CBC: WHITE BLOOD CELL COUNT'
-- 'METABOLIC: ALBUMIN'
-- 'METABOLIC: ALK PHOS'
-- 'METABOLIC: ALT/SGPT'
-- 'METABOLIC: ANION GAP'
-- 'METABOLIC: AST/SGOT'
-- 'METABOLIC: BILI TOTAL'
-- 'METABOLIC: BUN'
-- 'METABOLIC: CALCIUM'
-- 'METABOLIC: CARBON DIOXIDE'
-- 'METABOLIC: CHLORIDE'
-- 'METABOLIC: CREATININE'
-- 'METABOLIC: GLUCOSE'
-- 'METABOLIC: POTASSIUM'
-- 'METABOLIC: SODIUM'
-- 'METABOLIC: TOTAL PROTEIN'
-- 'URINALYSIS: PH'
-- 'URINALYSIS: RED BLOOD CELLS'
-- 'URINALYSIS: SPECIFIC GRAVITY'
-- 'URINALYSIS: WHITE BLOOD CELLS'
+  Valid lab values for sick_patients():
+  - 'CBC: ABSOLUTE LYMPHOCYTES'
+  - 'CBC: ABSOLUTE NEUTROPHILS'
+  - 'CBC: BASOPHILS'
+  - 'CBC: EOSINOPHILS'
+  - 'CBC: HEMATOCRIT'
+  - 'CBC: HEMOGLOBIN'
+  - 'CBC: LYMPHOCYTES'
+  - 'CBC: MCH'
+  - 'CBC: MCHC'
+  - 'CBC: MEAN CORPUSCULAR VOLUME'
+  - 'CBC: MONOCYTES'
+  - 'CBC: NEUTROPHILS'
+  - 'CBC: PLATELET COUNT'
+  - 'CBC: RDW'
+  - 'CBC: RED BLOOD CELL COUNT'
+  - 'CBC: WHITE BLOOD CELL COUNT'
+  - 'METABOLIC: ALBUMIN'
+  - 'METABOLIC: ALK PHOS'
+  - 'METABOLIC: ALT/SGPT'
+  - 'METABOLIC: ANION GAP'
+  - 'METABOLIC: AST/SGOT'
+  - 'METABOLIC: BILI TOTAL'
+  - 'METABOLIC: BUN'
+  - 'METABOLIC: CALCIUM'
+  - 'METABOLIC: CARBON DIOXIDE'
+  - 'METABOLIC: CHLORIDE'
+  - 'METABOLIC: CREATININE'
+  - 'METABOLIC: GLUCOSE'
+  - 'METABOLIC: POTASSIUM'
+  - 'METABOLIC: SODIUM'
+  - 'METABOLIC: TOTAL PROTEIN'
+  - 'URINALYSIS: PH'
+  - 'URINALYSIS: RED BLOOD CELLS'
+  - 'URINALYSIS: SPECIFIC GRAVITY'
+  - 'URINALYSIS: WHITE BLOOD CELLS'

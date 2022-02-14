@@ -9,27 +9,29 @@ from typing import Dict, Union
 2. In the command line type &quot;git clone&quot; and paste what you copied from GitHub ; Enter ; type &quot;cd&quot; and \"ehr-analysis\" ; Enter
 
 ## File Formats
-Files may be in any tabular form, This analysis assumes the first row of the files contain the column headers.
+Files may be in any tabular form as long as the first row of the files contain the column headers.
 
 ## API Description
 
 ## Execute functions
 1. In the command line type &quot;code ehr_analysis.py&quot;; Enter
 2. Once open, uncomment and use lines 184, 186 and 188 of ehr_analysis accordingly
-```
-# num_older_than:
-print(num_older_than(age=__, patient_dict=patient_dict))
+  1. fill in all __ with valid values
+  2. ValueError will appear if value entered is not valid
 
-# sick_patients:
-print(sick_patients(lab=__, gt_lt=__, value=__, lab_dict=lab_dict))
+### Examples
+    ```
+    # num_older_than:
+    print(num_older_than(age=68, patient_dict=patient_dict))
 
-# age_at_admis:
-print(age_at_admis(patient_id=__, lab_dict=lab_dict, patient_dict=patient_dict)))
-```
+    # sick_patients:
+    print(sick_patients(lab="METABOLIC: ALBUMIN", gt_lt=">", value=5.9, lab_dict=lab_dict))
 
-## Examples:
-
-All possible lab values:
+    # age_at_admis:
+    print(age_at_admis(patient_id="03A481F5-B32A-4A91-BD42-43EB78FEBA77", lab_dict=lab_dict, patient_dict=patient_dict)))
+    ```
+    
+All possible lab values for sick_patients():
 - 'CBC: ABSOLUTE LYMPHOCYTES'
 - 'CBC: ABSOLUTE NEUTROPHILS'
 - 'CBC: BASOPHILS'

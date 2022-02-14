@@ -1,0 +1,6 @@
+PatientID	PatientGender	PatientDateOfBirth	PatientRace	PatientMaritalStatus	PatientLanguage	PatientPopulationPercentageBelowPoverty
+69B5D2A0-12FD-46EF-A5FF-B29C4BAFBE49	Male	1954-05-02 16:38:15.957	White	Married	English	18.65
+80D356B4-F974-441F-A5F2-F95986D119A2	Female	1938-03-06 18:24:18.297	White	Single	English	18.88
+4C201C71-CCED-40D1-9642-F9C8C485B854	Male	1926-09-22 09:17:14.713	African American	Married	English	10.3
+CC9CDA72-B37A-4F8F-AFE4-B08F56A183BE	Female	1942-04-14 14:01:01.130	Asian	Married	Spanish	14.15
+6D5DCAC1-17FE-4D7C-923B-806EFBA3E6DF	Male	1961-10-22 02:47:13.170	Asian	Married	English	13.9

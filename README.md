@@ -23,7 +23,7 @@ Return the age at first admission of any given patient.
 
 ## Execute functions
 1. Open ehr_analysis.py
-2. Uncomment and use lines 184, 186 and 188 of ehr_analysis accordingly
+2. Uncomment and use lines below "if \__name__=="\__main__":
   1. fill in all __ with valid values
   2. ValueError will appear if value entered is not valid
 

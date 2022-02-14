@@ -6,9 +6,9 @@ from typing import Dict, Union
 
 ## Clone the repo
 1. click Code ; click SSH ; copy the address by clicking the icon on the right that looks like a clipboard
-2. In the command line type &quot;git clone&quot; and paste what you copied from GitHub ; Enter ; type &quot;cd&quot; and \"ehr-analysis\" ; Enter
+2. In the command line type &quot;git clone&quot; and paste what you copied from GitHub ; Enter ; type &quot;cd ehr-analysis&quot; ; Enter
 
-## File Formats
+## File Format
 Files may be in any tabular form as long as the first row of the files contain the column headers.
 
 ## API Description
@@ -21,14 +21,14 @@ Returns a (unique) list of patients who have a given test with value above (">")
 age_at_admis():
 Return the age at first admission of any given patient.
 
-## Execute functions
-1. Open ehr_analysis.py
-2. Uncomment and use lines below "if \_\_name\_\_=="\_\_main\_\_":
-  1. fill in all __ with valid values4
-  2.  ValueError will appear if value entered is not valid
-
 ## Testing Instructions
   1. In the command line, type "pytest test_ehr.py --cov"
+
+## Execute functions
+1. Open ehr_analysis.py
+2. Below "if \_\_name\_\_=="\_\_main\_\_":
+  1. Use examples below and replace with desired values for each function argument
+  2. ValueError will appear if value entered is not valid
 
 ### Examples
     ```
@@ -39,7 +39,7 @@ Return the age at first admission of any given patient.
     print(sick_patients(lab="METABOLIC: ALBUMIN", gt_lt=">", value=5.9, lab_dict=lab_dict))
 
     # age_at_admis:
-    print(age_at_admis(patient_id="03A481F5-B32A-4A91-BD42-43EB78FEBA77", lab_dict=lab_dict, patient_dict=patient_dict)))
+    print(age_at_admis(patient_id="4C201C71-CCED-40D1-9642-F9C8C485B854", lab_dict=lab_dict, patient_dict=patient_dict)))
     ```
     
   Valid lab values for sick_patients():

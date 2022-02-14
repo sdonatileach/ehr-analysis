@@ -14,7 +14,7 @@ Files may be in any tabular form as long as the first row of the files contain t
 ## API Description
 
 ## Execute functions
-1. In the command line type &quot;code ehr_analysis.py&quot;; Enter
+1. Open ehr_analysis.py
 2. Once open, uncomment and use lines 184, 186 and 188 of ehr_analysis accordingly
   1. fill in all __ with valid values
   2. ValueError will appear if value entered is not valid

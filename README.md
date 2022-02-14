@@ -12,10 +12,18 @@ from typing import Dict, Union
 Files may be in any tabular form as long as the first row of the files contain the column headers.
 
 ## API Description
+num_older_than():
+Returns the number of patients older than a given age (in years).
+
+sick_patients():
+Returns a (unique) list of patients who have a given test with value above (">") or below ("<") a given level.
+
+age_at_admis():
+Return the age at first admission of any given patient.
 
 ## Execute functions
 1. Open ehr_analysis.py
-2. Once open, uncomment and use lines 184, 186 and 188 of ehr_analysis accordingly
+2. Uncomment and use lines 184, 186 and 188 of ehr_analysis accordingly
   1. fill in all __ with valid values
   2. ValueError will appear if value entered is not valid
 
@@ -31,7 +39,7 @@ Files may be in any tabular form as long as the first row of the files contain t
     print(age_at_admis(patient_id="03A481F5-B32A-4A91-BD42-43EB78FEBA77", lab_dict=lab_dict, patient_dict=patient_dict)))
     ```
     
-All possible lab values for sick_patients():
+Valid lab values for sick_patients():
 - 'CBC: ABSOLUTE LYMPHOCYTES'
 - 'CBC: ABSOLUTE NEUTROPHILS'
 - 'CBC: BASOPHILS'

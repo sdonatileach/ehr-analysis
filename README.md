@@ -27,8 +27,8 @@ Return the age at first admission of any given patient.
 ## Execute functions
 1. Open ehr_analysis.py
 2. Below "if \_\_name\_\_=="\_\_main\_\_":
-  1. Use examples below and replace with desired values for each function argument
-  2. ValueError will appear if value entered is not valid
+     1. Use examples below and replace with desired values for each function argument
+     2. ValueError will appear if value entered is not valid
 
 ### Examples
     ```

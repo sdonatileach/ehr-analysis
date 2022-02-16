@@ -14,7 +14,8 @@ Second, we needed to be able to index and iterate over the list of lists
 in the other two functions."""
 
 import datetime
-from typing import Dict, List, Union, Any, overload
+from typing import Dict, List, Any, overload
+
 
 def parse_data(filename: str, delimiter: str) -> Dict[Any, List[Any]]:
     """Read and parse the data files. Returns a dictionary.
@@ -37,14 +38,13 @@ def parse_data(filename: str, delimiter: str) -> Dict[Any, List[Any]]:
     with open(filename, "r", encoding="UTF-8-sig") as file:
         data = file.readlines()
 
-        count = len(data)
         rows = []
         records = []
         columns = []
 
-        for i in data:
-            rows.append(i.strip("\n"))
-        for i in range(count):
+        for row in data:
+            rows.append(row.strip("\n"))
+        for i in range(len(data)):
             if i == 0:
                 columns.append(rows[i].split(delimiter))
             else:
@@ -149,7 +149,7 @@ def age_at_admis(
     patient_id: str,
     lab_dict: Dict[Any, List[Any]],
     patient_dict: Dict[Any, List[Any]],
-) -> float:
+) -> Any:
     """Returns the age of a patient at admission."""
     age_days = []
     age_years = []

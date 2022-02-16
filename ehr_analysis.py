@@ -14,10 +14,9 @@ Second, we needed to be able to index and iterate over the list of lists
 in the other two functions."""
 
 import datetime
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Any, overload
 
-
-def parse_data(filename: str, delimiter: str) -> Dict[str, Union[str, float]]:
+def parse_data(filename: str, delimiter: str) -> Dict[Any, List[Any]]:
     """Read and parse the data files. Returns a dictionary.
 
     Assumptions:
@@ -68,7 +67,7 @@ def date_time(x: List[str]) -> List[datetime.datetime]:
     return date
 
 
-def num_older_than(age: float, patient_dict: Dict[str, Union[str, float]]) -> int:
+def num_older_than(age: float, patient_dict: Dict[Any, List[Any]]) -> int:
     """Returns the number of patients older than a given age (in years).
 
     Assumptions:
@@ -106,7 +105,7 @@ def num_older_than(age: float, patient_dict: Dict[str, Union[str, float]]) -> in
 
 
 def sick_patients(
-    lab: str, gt_lt: str, value: float, lab_dict: Dict[str, Union[str, float]]
+    lab: str, gt_lt: str, value: float, lab_dict: Dict[Any, List[Any]]
 ) -> List[str]:
     """Returns a (unique) list of patients who have a given test with value
     above (">") or below ("<") a given level.
@@ -148,8 +147,8 @@ def sick_patients(
 
 def age_at_admis(
     patient_id: str,
-    lab_dict: Dict[str, Union[str, float]],
-    patient_dict: Dict[str, Union[str, float]],
+    lab_dict: Dict[Any, List[Any]],
+    patient_dict: Dict[Any, List[Any]],
 ) -> float:
     """Returns the age of a patient at admission."""
     age_days = []
@@ -176,7 +175,7 @@ def age_at_admis(
     for i in range(len(lab_dict["PatientID"])):
         if first_admis == admis_date[i]:
             age = lab_dict["PatientAgeAtAdmission"][i]
-            return round(age, 2)
+    return round(age, 2)
 
 
 if __name__ == "__main__":

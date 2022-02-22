@@ -13,11 +13,12 @@ First, we needed each dictionary key to map to multiple values.
 Second, we needed to be able to index and iterate over the list of lists
 in the other two functions."""
 
-import datetime
-from typing import Dict, List, Any, overload
+from datetime import datetime
+from typing import Union, Dict, List, TypedDict, Any
 
 
-def parse_data(filename: str, delimiter: str) -> Dict[Any, List[Any]]:
+
+def parse_data(filename: str, delimiter: str) -> Dict[str, List[str]]:
     """Read and parse the data files. Returns a dictionary.
 
     Assumptions:
@@ -60,14 +61,14 @@ def parse_data(filename: str, delimiter: str) -> Dict[Any, List[Any]]:
         return data_dict
 
 
-def date_time(x: List[str]) -> List[datetime.datetime]:
+def date_time(x: Union[List[str],List[float]]) -> List[datetime]:
     date = []
     for i in x:
-        date.append(datetime.datetime.strptime(i, "%Y-%m-%d %H:%M:%S.%f"))
+        date.append(datetime.strptime(str(i), "%Y-%m-%d %H:%M:%S.%f"))
     return date
 
 
-def num_older_than(age: float, patient_dict: Dict[Any, List[Any]]) -> int:
+def num_older_than(age: float, patient_dict: Dict[str, Union[List[str],List[float]]]) -> int:
     """Returns the number of patients older than a given age (in years).
 
     Assumptions:
@@ -88,10 +89,11 @@ def num_older_than(age: float, patient_dict: Dict[Any, List[Any]]) -> int:
     the constant factor, we yield O(N) complexity.
     """
 
-    today = datetime.datetime.today()
+    today = datetime.today()
     age_days = []
     age_years = []
-    brth_date = date_time(patient_dict["PatientDateOfBirth"])
+
+    brth_date: List[datetime] = date_time(patient_dict["PatientDateOfBirth"])
     for i in range(len(brth_date)):
         age_days.append(today - brth_date[i])
         age_years.append(age_days[i].days / 365.25)
@@ -99,14 +101,14 @@ def num_older_than(age: float, patient_dict: Dict[Any, List[Any]]) -> int:
 
     older = []
     for i in range(len(patient_dict["PatientAge"])):
-        if patient_dict["PatientAge"][i] > age:
+        if float(patient_dict["PatientAge"][i]) > age:
             older.append(patient_dict["PatientID"][i])
     return len(older)
 
 
 def sick_patients(
-    lab: str, gt_lt: str, value: float, lab_dict: Dict[Any, List[Any]]
-) -> List[str]:
+    lab: str, gt_lt: str, value: float, lab_dict: Dict[str, List[str]]) \
+             -> List[str]:
     """Returns a (unique) list of patients who have a given test with value
     above (">") or below ("<") a given level.
 
@@ -147,9 +149,9 @@ def sick_patients(
 
 def age_at_admis(
     patient_id: str,
-    lab_dict: Dict[Any, List[Any]],
-    patient_dict: Dict[Any, List[Any]],
-) -> Any:
+    lab_dict: Dict[str, Union[List[str],List[float]]],
+    patient_dict: Dict[str, List[str]],
+    ) -> Any:
     """Returns the age of a patient at admission."""
     age_days = []
     age_years = []
@@ -166,7 +168,7 @@ def age_at_admis(
                 age_years.append(age_days[i].days / 365.25)
             lab_dict["PatientAgeAtAdmission"] = age_years
 
-    first_admis = datetime.datetime.today()
+    first_admis = datetime.today()
 
     for i in range(len(lab_dict["PatientID"])):
         if lab_dict["PatientID"][i] == patient_id:
@@ -174,7 +176,7 @@ def age_at_admis(
                 first_admis = admis_date[i]
     for i in range(len(lab_dict["PatientID"])):
         if first_admis == admis_date[i]:
-            age = lab_dict["PatientAgeAtAdmission"][i]
+            age = float(lab_dict["PatientAgeAtAdmission"][i])
     return round(age, 2)
 
 

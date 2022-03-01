@@ -87,3 +87,7 @@ def parse_data(patient_file: str, lab_file: str, delimiter: str) -> Dict[str, Pa
             patient_info[0]
         ] = patient  # add all patient information plus labs to dictionary
     return patient_dict
+
+
+if __name__ == "__main__":
+    patient_dict = parse_data("PatientCorePopulatedTable.txt", "LabsCorePopulatedTable.txt", "\t")

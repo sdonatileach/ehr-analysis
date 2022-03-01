@@ -44,18 +44,18 @@ classes.py
   2. Below "if \_\_name\_\_=="\_\_main\_\_":
       1. Copy/paste example below and replace with desired patient id
       2. Patient information available:
-        1. patient_id
-        2. gender
-        3. DOB
-        4. race
-        5. age
-        6. age_at_admis
+          1. patient_id
+          2. gender
+          3. DOB
+          4. race
+          5. age
+          6. age_at_admis
       3. Lab information available:
-        1. patient_id
-        2. lab_name
-        3. lab_value
-        4. units
-        5. lab_date
+          1. patient_id
+          2. lab_name
+          3. lab_value
+          4. units
+          5. lab_date
   3. In the command line, type "python classes.py"
 
 ### Examples

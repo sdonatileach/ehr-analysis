@@ -17,3 +17,4 @@ def test_parse_data():
         "1990-05-09 13:29:31.897"
     assert patient.age == 83.98
     assert patient.age_at_admis == 52.17
+    

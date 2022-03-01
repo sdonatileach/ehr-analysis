@@ -28,7 +28,7 @@ Returns a dictionary where each key is a patient id and each value is the Patien
 testing ehr_analysis.py
 - In the command line, type "pytest test_ehr.py --cov"
 
-testing class.py
+testing classes.py
 - In the command line, type "pytest test_classes.py --cov"
 
 ## Execute functions

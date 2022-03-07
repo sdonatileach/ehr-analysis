@@ -42,7 +42,7 @@ ehr_analysis.py
 classes.py
   1. Open classes.py
   2. Below "if \_\_name\_\_=="\_\_main\_\_":
-      1. Copy/paste example below and replace with desired patient id
+      1. Copy/paste example below and replace with desired patient id/values
       2. Patient information available:
           1. patient_id
           2. gender
@@ -80,10 +80,10 @@ classes.py
         print(patient.labs[i].lab_date)
     
     # num_older_than():
-    num_older_than(65, patient_dict)
+    print(num_older_than(65, patient_dict))
 
     # sick_patients():
-    sick_patients("CBC: RDW", ">", 13.5, patient_dict)
+    print(sick_patients("CBC: RDW", ">", 13.5, patient_dict))
     ```
     
   Valid lab names for sick_patients():

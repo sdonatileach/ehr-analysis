@@ -91,6 +91,60 @@ def parse_data(patient_file: str, lab_file: str, delimiter: str) -> Dict[str, Pa
     return patient_dict
 
 
+def num_older_than(age: float, patient_dict: dict) -> int:
+    """Returns the number of patients who are older than a given age (in years).
+
+    Computational Complexity: Assuming `N` is the number of patients, we iterate
+    over the dictionary onceand initialize each patient, which takes N time. We
+    then check the age of each of the initialized patients is greater than the given
+    age, which also takes N time. Finally, incrementing the counter takes N time.
+    Our big-O notation is therefore 3N, and after dropping the constant factor, we
+    are left with O(N) time complexity.
+    """
+    num_older = 0
+    for i in range(len(patient_dict)):
+        patient = patient_dict[list(patient_dict.keys())[i]]
+        if patient.age > age:
+            num_older += 1
+    return num_older
+
+
+def sick_patients(lab: str, gt_lt: str, value: float, patient_dict: dict) -> set:
+    """Returns a (unique) list of patients who have a given test with value
+    above (">") or below ("<") a given level.
+
+    Computational Complexity: Assuming `N` is the number of patients and
+    `M` is the average number of labs per patient, we iterate over the length of the
+    dictionary once and initialize each patient, which takes N time. This is followed
+    by another iteration over all the labs of the initialized patients, giving us N*M
+    time complexity.  The next three "if" statements all take constant time,
+    but each operation need to be repeated for each N*M, because we are inside the for
+    loops, resulting in 4(N*M).  We repeat a similar process in the elif operation
+    which adds an additional 3(N*M) to the total. Finally, we look through the set of
+    unique labs which takes constant time. Our resulting big-O notation is
+    O((N*M)+4(N*M)+3(N*M)+N). After dropping the constant factor, we yield O(N*M)
+    time complexity.
+    """
+    sick_patients = set()
+    labs = set()
+    for i in range(len(patient_dict)):
+        patient = patient_dict[list(patient_dict.keys())[i]]
+        for i in range(len(patient.labs)):
+            labs.add(patient.labs[i].lab_name)
+            if lab == patient.labs[i].lab_name:
+                if gt_lt == ">":
+                    if float(patient.labs[i].value) > value:
+                        sick_patients.add(patient)
+                elif gt_lt == "<":
+                    if float(patient.labs[i].value) < value:
+                        sick_patients.add(patient)
+                else:
+                    raise ValueError("Please enter a valid operator")
+    if lab not in labs:
+        raise ValueError("Please enter a valid lab name")
+    return sick_patients
+
+
 if __name__ == "__main__":
     patient_dict = parse_data(
         "PatientCorePopulatedTable.txt", "LabsCorePopulatedTable.txt", "\t"

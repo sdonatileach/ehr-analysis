@@ -1,185 +1,151 @@
-"""Data Structures:
-
-Each of the following data structures is a dictionary where the keys 
-are each of the column headers, and the dictionary values are each of the
-corresponding column values in the form of a list of lists.
-    
-
-My rationale for choosing a dictionary as the data structure was that key-value 
-pairs have a similar structure to a standard table, where dictionary keys are 
-equivalent to table columns and dictionary values are equivalent to column values.
-My rationale for the dictionary values being a list of lists was two-fold.
-First, we needed each dictionary key to map to multiple values.
-Second, we needed to be able to index and iterate over the list of lists
-in the other two functions."""
-
 from datetime import datetime
-from typing import Union, Dict, List, TypedDict, Any
+from typing import Dict, List
 
 
+class Lab:
+    def __init__(
+        self, patient_id: str, lab_name: str, lab_value: str, units: str, lab_date: str
+    ):
+        self.patient_id = patient_id
+        self.lab_name = lab_name
+        self.value = lab_value
+        self.units = units
+        self.lab_date = lab_date
 
-def parse_data(filename: str, delimiter: str) -> Dict[str, List[str]]:
+
+class Patient:
+    def __init__(
+        self, patient_id: str, gender: str, DOB: str, race: str, labs: List[Lab]
+    ):
+        self.patient_id = patient_id
+        self.gender = gender
+        self.DOB = datetime.strptime(str(DOB), "%Y-%m-%d %H:%M:%S.%f")
+        self.race = race
+        self.labs = labs
+
+    @property
+    def age(self) -> float:
+        age = (datetime.today() - self.DOB).days / 365.25
+        return round(age, 2)
+
+    @property
+    def age_at_admis(self) -> float:
+        admis_dates = []
+        for i in range(len(self.labs)):
+            admis_dates.append(
+                datetime.strptime(str(self.labs[i].lab_date), "%Y-%m-%d %H:%M:%S.%f")
+            )
+        age = (min(admis_dates) - self.DOB).days / 365.25
+        return round(age, 2)
+
+
+def parse_data(patient_file: str, lab_file: str, delimiter: str) -> Dict[str, Patient]:
     """Read and parse the data files. Returns a dictionary.
 
     Assumptions:
     - the first row of the file contains the column headers
+    - the positions of the columns of interest in the files will not change
 
-    Computational Complexity: opening the file takes constant time,
-    but reading lines takes N time, where N is the number of lines in the file.
-    Stripping the lines of whitespace and splitting the lines into a list
-    takes N time as we are looping through all lines. The operation of appending
-    to lists takes constant time, but appending to the "columns" list only
-    occurs once, whereas appending to the "rows" occurs N times, and appending to
-    the "records" list occurs N-1 times.  Finally, creating the empty
-    dictionary takes constant time, and then we begin to iterate over the length of
-    the columns and within that the length of the rows, which takes N^2 time.
-    Our big-O notation is therefore O(N**2+(N-1)+3N) and after dropping the
-    constant factor, we yield O(N**2) complexity.
+    Computational Complexity: Assuming `N` is the number of patients and
+    `M` is the average number of labs per patient, opening the patient file takes
+    constant time, and reading lines takes N time, where N is the number of lines
+    in the file. Opening the lab file takes constant time, and reading lines takes
+    N*M time because there are M labs per patient. Creating the empty dictionary
+    takes constant time. Stripping the lines of whitespace and splitting the lines
+    into a list takes N time as we are looping through all lines in the patient file.
+    We do the same thing with the lab file, except this time it is nested inside
+    the previous loop, yielding N*N*M time. The following if statement happens N*N*M
+    times as well because it is inside this loop. Initializing the Lab object takes
+    constant time, and appending it to the list takes constant time. This all occurs
+    inside the lab loop, yielding N*N*M time. Initializing the Patient object takes
+    constant time, which occcurs inside the patient loop, yielding N time. Finally,
+    adding all patient information plus the list of labs to the dictionary takes
+    constant time, occuring N times. Our big-O notation is therefore
+    O(N+(N*M)+3(N*N*M)+2N) and after dropping the constant factor, we yield O(N*N*M)
+    complexity.
     """
-    with open(filename, "r", encoding="UTF-8-sig") as file:
-        data = file.readlines()
-
-        rows = []
-        records = []
-        columns = []
-
-        for row in data:
-            rows.append(row.strip("\n"))
-        for i in range(len(data)):
-            if i == 0:
-                columns.append(rows[i].split(delimiter))
-            else:
-                records.append(rows[i].split(delimiter))
-
-        data_dict = dict()
-        for i in range(len(columns[0])):
-            values = []
-            for j in range(len(records)):
-                values.append(records[j][i])
-            data_dict[columns[0][i]] = values
-
-        return data_dict
-
-
-def date_time(x: Union[List[str],List[float]]) -> List[datetime]:
-    date = []
-    for i in x:
-        date.append(datetime.strptime(str(i), "%Y-%m-%d %H:%M:%S.%f"))
-    return date
+    patient_data = open(patient_file, "r", encoding="UTF-8-sig").readlines()
+    lab_data = open(lab_file, "r", encoding="UTF-8-sig").readlines()
+    patient_dict = dict()
+    for i in range(len(patient_data) - 1):
+        i += 1  # skip header
+        patient_info = patient_data[i].strip("\n").split(delimiter)
+        patient_labs = []  # list of labs to be replaced with every new patient
+        for j in range(len(lab_data) - 1):
+            j += 1  # skip header
+            lab_info = lab_data[j].strip("\n").split(delimiter)
+            if patient_info[0] == lab_info[0]:
+                patient_labs.append(
+                    Lab(lab_info[0], lab_info[2], lab_info[3], lab_info[4], lab_info[5])
+                )  # initialize lab object and append to list
+        patient = Patient(
+            patient_info[0],
+            patient_info[1],
+            patient_info[2],
+            patient_info[3],
+            patient_labs,
+        )  # initialize patient object with all info and list of labs
+        patient_dict[
+            patient_info[0]
+        ] = patient  # add all patient information plus labs to dictionary
+    return patient_dict
 
 
-def num_older_than(age: float, patient_dict: Dict[str, Union[List[str],List[float]]]) -> int:
-    """Returns the number of patients older than a given age (in years).
+def num_older_than(age: float, patient_dict: Dict[str, Patient]) -> int:
+    """Returns the number of patients who are older than a given age (in years).
 
-    Assumptions:
-    - the user will pass the output of "parse_data" into this function
-        as "patient_dict"
-    - the file that was passed into the "parse_data" function will contain
-        the fields PatientDateOfBirth and PatientID.
-
-    Computational Complexity: creating the "dates" object takes constant time,
-    and then we iterate over the length of the object, which takes N time, to
-    get the date in the format we need. Creating the "today" object takes constant
-    time. The operation of appending to lists takes constant time, but this occurs
-    2N times; once for the "age_days" list, and once for the "age_years" list.
-    Moving on to the next step, we iterate over the length of the "patient_dict"
-    list, which takes N time. The if statement happens N times as well because it
-    is inside this loop, giving us 2N. Finally, we append to the "older" list N times,
-    resulting in 3N.  Our big-O notation is therefore O(2N+N+3N) and after dropping
-    the constant factor, we yield O(N) complexity.
+    Computational Complexity: Assuming `N` is the number of patients, we iterate
+    over the dictionary once and initialize each patient, which takes N time. We
+    then check the age of each of the initialized patients is greater than the given
+    age, which also takes N time. Finally, incrementing the counter takes N time.
+    Our big-O notation is therefore 3N, and after dropping the constant factor, we
+    are left with O(N) time complexity.
     """
-
-    today = datetime.today()
-    age_days = []
-    age_years = []
-
-    brth_date: List[datetime] = date_time(patient_dict["PatientDateOfBirth"])
-    for i in range(len(brth_date)):
-        age_days.append(today - brth_date[i])
-        age_years.append(age_days[i].days / 365.25)
-    patient_dict["PatientAge"] = age_years
-
-    older = []
-    for i in range(len(patient_dict["PatientAge"])):
-        if float(patient_dict["PatientAge"][i]) > age:
-            older.append(patient_dict["PatientID"][i])
-    return len(older)
+    num_older = 0
+    for patient in patient_dict.values():
+        if patient.age > age:
+            num_older += 1
+    return num_older
 
 
 def sick_patients(
-    lab: str, gt_lt: str, value: float, lab_dict: Dict[str, List[str]]) \
-             -> List[str]:
+    lab: str, gt_lt: str, value: float, patient_dict: Dict[str, Patient]
+) -> set:
     """Returns a (unique) list of patients who have a given test with value
     above (">") or below ("<") a given level.
 
-    Assumptions:
-    - the user will pass the output of "parse_data" into this function
-        as "lab_dict"
-    - the file that was passed into the "parse_data" function will contain
-        the fields PatientID, LabValue and LabName.
-
-    Computational Complexity: this function start with an empty list which is
-    constant time. Then we iterate over the length of the "lab_dict" list, which
-    takes N time, which is followed by another iteration over all the items of the
-    dictionary.  Therefore, we have N**2 time complexity.  The next four if
-    statements followed by appending to the "values" list all take constant time,
-    but each operation need to be repeated for each N, because we are inside the for
-    loops, resulting in 5N.  We repeat a similar process in the elif operation which
-    adds an additional 4N to the total. Our big-O notation is therefore O(N**2+5N+4N)
-    and after dropping the constant factor, we yield O(N**2) complexity.
+    Computational Complexity: Assuming `N` is the number of patients and
+    `M` is the average number of labs per patient, we iterate over the length of the
+    dictionary once and initialize each patient, which takes N time. This is followed
+    by another iteration over all the labs of the initialized patients, giving us N*M
+    time complexity.  The next three "if" statements all take constant time,
+    but each operation need to be repeated for each N*M, because we are inside the for
+    loops, resulting in 4(N*M).  We repeat a similar process in the elif operation
+    which adds an additional 3(N*M) to the total. Finally, we look through the set of
+    unique labs which takes constant time. Our resulting big-O notation is
+    O((N*M)+4(N*M)+3(N*M)+N). After dropping the constant factor, we yield O(N*M)
+    time complexity.
     """
-
-    values = []
-    if lab not in lab_dict["LabName"]:
+    sick_patients = set()
+    labs = set()
+    for patient in patient_dict.values():
+        for i in range(len(patient.labs)):
+            labs.add(patient.labs[i].lab_name)
+            if lab == patient.labs[i].lab_name:
+                if gt_lt == ">":
+                    if float(patient.labs[i].value) > value:
+                        sick_patients.add(patient)
+                elif gt_lt == "<":
+                    if float(patient.labs[i].value) < value:
+                        sick_patients.add(patient)
+                else:
+                    raise ValueError("Please enter a valid operator")
+    if lab not in labs:
         raise ValueError("Please enter a valid lab name")
-    for i in range(len(lab_dict["PatientID"])):
-        if lab_dict["LabName"][i] == lab:
-            if gt_lt == ">":
-                if lab_dict["LabValue"][i] > str(value):
-                    if lab_dict["PatientID"][i] not in values:
-                        values.append(lab_dict["PatientID"][i])
-            elif gt_lt == "<":
-                if lab_dict["LabValue"][i] < str(value):
-                    if lab_dict["PatientID"][i] not in values:
-                        values.append(lab_dict["PatientID"][i])
-            else:
-                raise ValueError("Please enter a valid operator")
-    return values
-
-
-def age_at_admis(
-    patient_id: str,
-    lab_dict: Dict[str, Union[List[str],List[float]]],
-    patient_dict: Dict[str, List[str]],
-    ) -> Any:
-    """Returns the age of a patient at admission."""
-    age_days = []
-    age_years = []
-    admis_date = date_time(lab_dict["LabDateTime"])
-    brth_date = date_time(patient_dict["PatientDateOfBirth"])
-
-    if patient_id not in lab_dict["PatientID"]:
-        raise ValueError("Please enter a valid PatientID")
-
-    for i in range(len(admis_date)):
-        for j in range(len(brth_date)):
-            if lab_dict["PatientID"][i] == patient_dict["PatientID"][j]:
-                age_days.append(admis_date[i] - brth_date[j])
-                age_years.append(age_days[i].days / 365.25)
-            lab_dict["PatientAgeAtAdmission"] = age_years
-
-    first_admis = datetime.today()
-
-    for i in range(len(lab_dict["PatientID"])):
-        if lab_dict["PatientID"][i] == patient_id:
-            if admis_date[i] < first_admis:
-                first_admis = admis_date[i]
-    for i in range(len(lab_dict["PatientID"])):
-        if first_admis == admis_date[i]:
-            age = float(lab_dict["PatientAgeAtAdmission"][i])
-    return round(age, 2)
+    return sick_patients
 
 
 if __name__ == "__main__":
-    patient_dict = parse_data("PatientCorePopulatedTable.txt", "\t")
-    lab_dict = parse_data("LabsCorePopulatedTable.txt", "\t")
+    patient_dict = parse_data(
+        "PatientCorePopulatedTable.txt", "LabsCorePopulatedTable.txt", "\t"
+    )

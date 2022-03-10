@@ -1,49 +1,34 @@
-"""Test EHR analysis."""
+"""Test EHR classes and functions."""
+
 import pytest
-from ehr_analysis import (
-    parse_data,
-    date_time,
-    num_older_than,
-    sick_patients,
-    age_at_admis,
-)
+from ehr_analysis import datetime, parse_data, num_older_than, sick_patients
 
 
 def test_parse_data():
-    """Test parse_data()."""
-    assert len(parse_data("PatientSampleData.txt", "\t")) == 7
-    assert len(parse_data("LabsSampleData.txt", "\t")) == 6
-
-
-def test_date_time():
-    """Test date_time()."""
-    assert len(date_time(patient_dict["PatientDateOfBirth"])) == 5
-    assert len(date_time(lab_dict["LabDateTime"])) == 10
+    """Test parse_data function."""
+    patient_dict = parse_data("PatientSampleData.txt", "LabsSampleData.txt", "\t")
+    patient = patient_dict["80D356B4-F974-441F-A5F2-F95986D119A2"]
+    assert patient.DOB == datetime(1938, 3, 6, 18, 24, 18, 297000)
+    for i in range(len(patient.labs)):
+        assert (
+            patient.labs[i].lab_date
+        ) == "1990-05-09 08:11:28.813" or "1990-05-09 13:29:31.897"
+    assert patient.age == 84.0
+    assert patient.age_at_admis == 52.17
 
 
 def test_num_older_than():
-    """Test num_older_than()."""
-    assert num_older_than(51.2, patient_dict) == 5
+    """Test num_older_than function."""
+    patient_dict = parse_data("PatientSampleData.txt", "LabsSampleData.txt", "\t")
+    assert num_older_than(65, patient_dict) == 4
+    pass
 
 
 def test_sick_patients():
-    """Test sick_patients()."""
-    assert len(sick_patients("CBC: RDW", ">", 0.5, lab_dict)) == 3
+    """Test sick patients function."""
+    patient_dict = parse_data("PatientSampleData.txt", "LabsSampleData.txt", "\t")
+    assert len(sick_patients("CBC: RDW", ">", 13.5, patient_dict)) == 2
     with pytest.raises(ValueError):
-        sick_patients("hello", ">", 0.5, lab_dict)
+        sick_patients("CBC: RDW", "?", 12, patient_dict)
     with pytest.raises(ValueError):
-        sick_patients("CBC: RDW", "?", 0.5, lab_dict)
-
-
-def test_age_at_admis():
-    """Test age_at_admis()."""
-    assert (
-        age_at_admis("4C201C71-CCED-40D1-9642-F9C8C485B854", lab_dict, patient_dict)
-        == 29.41
-    )
-    with pytest.raises(ValueError):
-        age_at_admis("42", lab_dict, patient_dict)
-
-
-patient_dict = parse_data("PatientSampleData.txt", "\t")
-lab_dict = parse_data("LabsSampleData.txt", "\t")
+        sick_patients("hello", ">", 12, patient_dict)

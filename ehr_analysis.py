@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Set
 
 
 class Lab:
@@ -50,44 +50,41 @@ def parse_data(patient_file: str, lab_file: str, delimiter: str) -> Dict[str, Pa
     `M` is the average number of labs per patient, opening the patient file takes
     constant time, and reading lines takes N time, where N is the number of lines
     in the file. Opening the lab file takes constant time, and reading lines takes
-    N*M time because there are M labs per patient. Creating the empty dictionary
+    N*M time because there are M labs per patient. Creating the empty dictionaries
     takes constant time. Stripping the lines of whitespace and splitting the lines
-    into a list takes N time as we are looping through all lines in the patient file.
-    We do the same thing with the lab file, except this time it is nested inside
-    the previous loop, yielding N*N*M time. The following if statement happens N*N*M
-    times as well because it is inside this loop. Initializing the Lab object takes
-    constant time, and appending it to the list takes constant time. This all occurs
-    inside the lab loop, yielding N*N*M time. Initializing the Patient object takes
-    constant time, which occcurs inside the patient loop, yielding N time. Finally,
-    adding all patient information plus the list of labs to the dictionary takes
-    constant time, occuring N times. Our big-O notation is therefore
-    O(N+(N*M)+3(N*N*M)+2N) and after dropping the constant factor, we yield O(N*N*M)
-    complexity.
+    into a list takes N*M time as we are looping through all lines in the lab file.
+    Initializing the Lab object takes constant time. The following if/else statements
+    happens N*M times because it is inside this loop, and the resulting actions of
+    adding information to the dictionary take constant time, occuring N*M times.
+    Initializing the Patient object takes constant time, which occcurs inside the
+    patient loop, yielding N time. Finally, adding all patient information plus the
+    list of labs to the dictionary takes constant time, occuring N times.
+    Our big-O notation is therefore O(N+3(N*M)+2N) and after dropping the constant
+    factor, we yield O(N*M) complexity.
     """
     patient_data = open(patient_file, "r", encoding="UTF-8-sig").readlines()
     lab_data = open(lab_file, "r", encoding="UTF-8-sig").readlines()
     patient_dict = dict()
-    for i in range(len(patient_data) - 1):
-        i += 1  # skip header
-        patient_info = patient_data[i].strip("\n").split(delimiter)
-        patient_labs = []  # list of labs to be replaced with every new patient
-        for j in range(len(lab_data) - 1):
-            j += 1  # skip header
-            lab_info = lab_data[j].strip("\n").split(delimiter)
-            if patient_info[0] == lab_info[0]:
-                patient_labs.append(
-                    Lab(lab_info[0], lab_info[2], lab_info[3], lab_info[4], lab_info[5])
-                )  # initialize lab object and append to list
+    lab_dict = dict()
+    for lab_row in lab_data[1:]:
+        lab_info = lab_row.strip("\n").split(delimiter)
+        lab_object = Lab(
+            lab_info[0], lab_info[2], lab_info[3], lab_info[4], lab_info[5]
+        )
+        if lab_info[0] not in lab_dict:
+            lab_dict[lab_info[0]] = [lab_object]
+        else:
+            lab_dict[lab_info[0]].append(lab_object)
+    for patient_row in patient_data[1:]:
+        patient_info = patient_row.strip("\n").split(delimiter)
         patient = Patient(
             patient_info[0],
             patient_info[1],
             patient_info[2],
             patient_info[3],
-            patient_labs,
-        )  # initialize patient object with all info and list of labs
-        patient_dict[
-            patient_info[0]
-        ] = patient  # add all patient information plus labs to dictionary
+            lab_dict[patient_info[0]],
+        )
+        patient_dict[patient_info[0]] = patient
     return patient_dict
 
 
@@ -110,7 +107,7 @@ def num_older_than(age: float, patient_dict: Dict[str, Patient]) -> int:
 
 def sick_patients(
     lab: str, gt_lt: str, value: float, patient_dict: Dict[str, Patient]
-) -> set:
+) -> Set(list):
     """Returns a (unique) list of patients who have a given test with value
     above (">") or below ("<") a given level.
 

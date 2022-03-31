@@ -1,7 +1,9 @@
 ## Installation
 ```
-import datetime
-from typing import Dict, Union
+from datetime import datetime
+import sqlite3
+import os
+from typing import List
 ```
 
 ## Clone the repo

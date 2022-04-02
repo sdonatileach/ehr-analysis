@@ -11,12 +11,12 @@ from ehr_analysis import (
     sick_patients,
 )
 
-database = "/mnt/c/Users/sdona/Documents/Duke/22Spring/821BIOSTAT/EHR_hw/SampleDB.db"
+database = "SampleDB.db"
 
 def test_age():
     """Test age function."""
     parse_data(database, "PatientSampleData.txt", "LabsSampleData.txt", "\t")
-    assert age("80D356B4-F974-441F-A5F2-F95986D119A2", database) == 84.06
+    assert age("80D356B4-F974-441F-A5F2-F95986D119A2", database) == 84.07
 
 
 def test_age_at_admis():
@@ -29,7 +29,6 @@ def test_num_older_than():
     """Test num_older_than function."""
     parse_data(database, "PatientSampleData.txt", "LabsSampleData.txt", "\t")
     assert num_older_than(65, database) == 4
-    pass
 
 
 def test_sick_patients():

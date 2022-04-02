@@ -1,10 +1,9 @@
 ## Installation
-```
-from datetime import datetime
-import sqlite3
-import os
-from typing import List
-```
+
+- `datetime` library
+- `typing` library
+- `pytest` library
+
 
 ## Clone the repo
 1. click Code ; click SSH ; copy the address by clicking the icon on the right that looks like a clipboard

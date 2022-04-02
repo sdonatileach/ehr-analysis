@@ -4,7 +4,12 @@ import os
 from typing import List
 
 
-def parse_data(database, patient_file, lab_file, delimiter):
+def parse_data(
+    database: sqlite3.Connection,
+    patient_file: sqlite3.Connection,
+    lab_file: sqlite3.Connection,
+    delimiter: str,
+) -> None:
     """Parses the patient and lab files and creates tables in a database."""
     os.remove(database)
 
@@ -56,10 +61,11 @@ def parse_data(database, patient_file, lab_file, delimiter):
 
 
 def date_time(date_time_field: str) -> datetime:
+    """Converts a string to a datetime object."""
     return datetime.strptime(date_time_field[0][0], "%Y-%m-%d %H:%M:%S.%f")
 
 
-def age(patient_id: str, database) -> float:
+def age(patient_id: str, database: sqlite3.Connection) -> float:
     """Returns the age of a patient."""
     con = sqlite3.connect(database)
     cur = con.cursor()
@@ -72,7 +78,7 @@ def age(patient_id: str, database) -> float:
     return age
 
 
-def age_at_admis(patient_id: str, database) -> float:
+def age_at_admis(patient_id: str, database: sqlite3.Connection) -> float:
     """Returns the age of a patient at first admission."""
     con = sqlite3.connect(database)
     cur = con.cursor()
@@ -89,7 +95,7 @@ def age_at_admis(patient_id: str, database) -> float:
     return age_at_admis
 
 
-def num_older_than(given_age: float, database) -> int:
+def num_older_than(given_age: float, database: sqlite3.Connection) -> int:
     """Returns the number of patients who are older than a given age (in years)."""
     con = sqlite3.connect(database)
     cur = con.cursor()
@@ -102,7 +108,9 @@ def num_older_than(given_age: float, database) -> int:
     return len(ages)
 
 
-def sick_patients(lab: str, gt_lt: str, value: float, database) -> str:
+def sick_patients(
+    lab: str, gt_lt: str, value: float, database: sqlite3.Connection
+) -> str:
     """Returns a (unique) list of patients who have a given test with value
     above (">") or below ("<") a given level."""
     con = sqlite3.connect(database)

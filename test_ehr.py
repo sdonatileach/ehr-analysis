@@ -16,7 +16,7 @@ database = "SampleDB.db"
 def test_age():
     """Test age function."""
     parse_data(database, "PatientSampleData.txt", "LabsSampleData.txt", "\t")
-    assert age("80D356B4-F974-441F-A5F2-F95986D119A2", database) == 84.07
+    assert age("80D356B4-F974-441F-A5F2-F95986D119A2", database) == 84.08
 
 
 def test_age_at_admis():

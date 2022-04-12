@@ -1,17 +1,19 @@
 from datetime import datetime
 import sqlite3
 import os
-from typing import List
+from typing import List, Union
 
 
 def parse_data(
-    database: sqlite3.Connection,
-    patient_file: sqlite3.Connection,
-    lab_file: sqlite3.Connection,
+    database: str,
+    patient_file: str,
+    lab_file: str,
     delimiter: str,
 ) -> None:
     """Parses the patient and lab files and creates tables in a database."""
     os.remove(database)
+    os.path.exists(patient_file)
+    os.path.exists(lab_file)
 
     con = sqlite3.connect(database)
     cur = con.cursor()
@@ -44,58 +46,58 @@ def parse_data(
     lab_data = open(lab_file, "r", encoding="UTF-8-sig").readlines()
     for patient_row in patient_data[1:]:
         patient_info = patient_row.strip("\n").split(delimiter)
-        patient_table = cur.executemany(
-            "INSERT INTO patients VALUES (?,?,?,?,?,?,?)", [patient_info]
+        patient_table = cur.execute(
+            "INSERT INTO patients VALUES (?,?,?,?,?,?,?)", patient_info
         )
     for lab_row in lab_data[1:]:
         lab_info = lab_row.strip("\n").split(delimiter)
-        lab_table = cur.executemany(
+        lab_table = cur.execute(
             "INSERT INTO"
             " labs(PatientID,AdmissionID,LabName,LabValue,LabUnits,LabDateTime)"
             " VALUES (?,?,?,?,?,?)",
-            [lab_info],
+            lab_info,
         )
 
     con.commit()
     cur.close()
 
 
-def date_time(date_time_field: str) -> datetime:
+def date_time(date_time_field: List[tuple]) -> datetime:
     """Converts a string to a datetime object."""
     return datetime.strptime(date_time_field[0][0], "%Y-%m-%d %H:%M:%S.%f")
 
 
-def age(patient_id: str, database: sqlite3.Connection) -> float:
+def age(patient_id: str, database: str) -> float:
     """Returns the age of a patient."""
     con = sqlite3.connect(database)
     cur = con.cursor()
-    DOB = cur.execute(
+    date_of_birth = cur.execute(
         "SELECT PatientDateofBirth FROM patients WHERE PatientID = ?", (patient_id,)
     ).fetchall()
-    DOB = date_time(DOB)
+    DOB = date_time(date_of_birth)
     age = round((datetime.today() - DOB).days / 365.25, 2)
     con.close()
     return age
 
 
-def age_at_admis(patient_id: str, database: sqlite3.Connection) -> float:
+def age_at_admis(patient_id: str, database: str) -> float:
     """Returns the age of a patient at first admission."""
     con = sqlite3.connect(database)
     cur = con.cursor()
-    lab_date = cur.execute(
+    date_of_lab = cur.execute(
         "SELECT min(LabDateTime) FROM labs WHERE PatientID = ?", (patient_id,)
     ).fetchall()
-    DOB = cur.execute(
+    date_of_birth = cur.execute(
         "SELECT PatientDateofBirth FROM patients WHERE PatientID = ?", (patient_id,)
     ).fetchall()
-    lab_date = date_time(lab_date)
-    DOB = date_time(DOB)
+    lab_date = date_time(date_of_lab)
+    DOB = date_time(date_of_birth)
     age_at_admis = round((lab_date - DOB).days / 365.25, 2)
     con.close()
     return age_at_admis
 
 
-def num_older_than(given_age: float, database: sqlite3.Connection) -> int:
+def num_older_than(given_age: float, database: str) -> int:
     """Returns the number of patients who are older than a given age (in years)."""
     con = sqlite3.connect(database)
     cur = con.cursor()
@@ -109,8 +111,8 @@ def num_older_than(given_age: float, database: sqlite3.Connection) -> int:
 
 
 def sick_patients(
-    lab: str, gt_lt: str, value: float, database: sqlite3.Connection
-) -> str:
+    lab: str, gt_lt: str, value: float, database: str
+) -> List[str]:
     """Returns a (unique) list of patients who have a given test with value
     above (">") or below ("<") a given level."""
     con = sqlite3.connect(database)
@@ -134,7 +136,8 @@ def sick_patients(
 if __name__ == "__main__":
     parse_data(
         "SampleDB.db",
-        "PatientCorePopulatedTable.txt",
-        "LabsCorePopulatedTable.txt",
+        "PatientSampleData.txt",
+        "LabsSampleData.txt",
         "\t",
     )
+

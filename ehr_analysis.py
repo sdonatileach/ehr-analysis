@@ -11,9 +11,12 @@ def parse_data(
     delimiter: str,
 ) -> None:
     """Parses the patient and lab files and creates tables in a database."""
-    os.remove(database)
-    os.path.exists(patient_file)
-    os.path.exists(lab_file)
+    if os.path.exists(database):
+        os.remove(database)
+    if not os.path.exists(patient_file):
+        raise FileNotFoundError("Patient file not found")
+    if not os.path.exists(lab_file):
+        raise FileNotFoundError("Lab file not found")
 
     con = sqlite3.connect(database)
     cur = con.cursor()

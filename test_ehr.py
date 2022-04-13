@@ -13,10 +13,18 @@ from ehr_analysis import (
 
 database = "SampleDB.db"
 
+def test_parse_data():
+    """Test parse_data function"""
+    with pytest.raises(FileNotFoundError):
+        parse_data(database, "mistake.txt", "LabsSampleData.txt", "\t")
+    with pytest.raises(FileNotFoundError):
+        parse_data(database, "PatientSampleData.txt", "mistake.txt", "\t")
+
+
 def test_age():
     """Test age function."""
     parse_data(database, "PatientSampleData.txt", "LabsSampleData.txt", "\t")
-    assert age("80D356B4-F974-441F-A5F2-F95986D119A2", database) == 84.08
+    assert age("80D356B4-F974-441F-A5F2-F95986D119A2", database) == 84.1
 
 
 def test_age_at_admis():

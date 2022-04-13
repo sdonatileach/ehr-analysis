@@ -1,148 +1,146 @@
 from datetime import datetime
-from typing import Dict, List, Set
+import sqlite3
+import os
+from typing import List, Union
 
 
-class Lab:
-    def __init__(
-        self, patient_id: str, lab_name: str, lab_value: str, units: str, lab_date: str
-    ):
-        self.patient_id = patient_id
-        self.lab_name = lab_name
-        self.value = lab_value
-        self.units = units
-        self.lab_date = lab_date
+def parse_data(
+    database: str,
+    patient_file: str,
+    lab_file: str,
+    delimiter: str,
+) -> None:
+    """Parses the patient and lab files and creates tables in a database."""
+    if os.path.exists(database):
+        os.remove(database)
+    if not os.path.exists(patient_file):
+        raise FileNotFoundError("Patient file not found")
+    if not os.path.exists(lab_file):
+        raise FileNotFoundError("Lab file not found")
 
+    con = sqlite3.connect(database)
+    cur = con.cursor()
 
-class Patient:
-    def __init__(
-        self, patient_id: str, gender: str, DOB: str, race: str, labs: List[Lab]
-    ):
-        self.patient_id = patient_id
-        self.gender = gender
-        self.DOB = datetime.strptime(str(DOB), "%Y-%m-%d %H:%M:%S.%f")
-        self.race = race
-        self.labs = labs
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS patients(
+            [PatientID] TEXT PRIMARY KEY,
+            [PatientGender] TEXT,
+            [PatientDateofBirth] TEXT,
+            [PatientRace] TEXT,
+            [PatientMaritalStatus] TEXT,
+            [PatientLanguage] TEXT,
+            [PatientPopulationPercentageBelowPoverty] TEXT
+            )"""
+    )
 
-    @property
-    def age(self) -> float:
-        age = (datetime.today() - self.DOB).days / 365.25
-        return round(age, 2)
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS labs(
+            [LabID] INTEGER PRIMARY KEY AUTOINCREMENT,
+            [PatientID] TEXT,
+            [AdmissionID] TEXT,
+            [LabName] TEXT,
+            [LabValue] TEXT,
+            [LabUnits] TEXT,
+            [LabDateTime] TEXT
+            )"""
+    )
 
-    @property
-    def age_at_admis(self) -> float:
-        admis_dates = []
-        for i in range(len(self.labs)):
-            admis_dates.append(
-                datetime.strptime(str(self.labs[i].lab_date), "%Y-%m-%d %H:%M:%S.%f")
-            )
-        age = (min(admis_dates) - self.DOB).days / 365.25
-        return round(age, 2)
-
-
-def parse_data(patient_file: str, lab_file: str, delimiter: str) -> Dict[str, Patient]:
-    """Read and parse the data files. Returns a dictionary.
-
-    Assumptions:
-    - the first row of the file contains the column headers
-    - the positions of the columns of interest in the files will not change
-
-    Computational Complexity: Assuming `N` is the number of patients and
-    `M` is the average number of labs per patient, opening the patient file takes
-    constant time, and reading lines takes N time, where N is the number of lines
-    in the file. Opening the lab file takes constant time, and reading lines takes
-    N*M time because there are M labs per patient. Creating the empty dictionaries
-    takes constant time. Stripping the lines of whitespace and splitting the lines
-    into a list takes N*M time as we are looping through all lines in the lab file.
-    Initializing the Lab object takes constant time. The following if/else statements
-    happens N*M times because it is inside this loop, and the resulting actions of
-    adding information to the dictionary take constant time, occuring N*M times.
-    Initializing the Patient object takes constant time, which occcurs inside the
-    patient loop, yielding N time. Finally, adding all patient information plus the
-    list of labs to the dictionary takes constant time, occuring N times.
-    Our big-O notation is therefore O(N+3(N*M)+2N) and after dropping the constant
-    factor, we yield O(N*M) complexity.
-    """
     patient_data = open(patient_file, "r", encoding="UTF-8-sig").readlines()
     lab_data = open(lab_file, "r", encoding="UTF-8-sig").readlines()
-    patient_dict = dict()
-    lab_dict = dict()
-    for lab_row in lab_data[1:]:
-        lab_info = lab_row.strip("\n").split(delimiter)
-        lab_object = Lab(
-            lab_info[0], lab_info[2], lab_info[3], lab_info[4], lab_info[5]
-        )
-        if lab_info[0] not in lab_dict:
-            lab_dict[lab_info[0]] = [lab_object]
-        else:
-            lab_dict[lab_info[0]].append(lab_object)
     for patient_row in patient_data[1:]:
         patient_info = patient_row.strip("\n").split(delimiter)
-        patient = Patient(
-            patient_info[0],
-            patient_info[1],
-            patient_info[2],
-            patient_info[3],
-            lab_dict[patient_info[0]],
+        patient_table = cur.execute(
+            "INSERT INTO patients VALUES (?,?,?,?,?,?,?)", patient_info
         )
-        patient_dict[patient_info[0]] = patient
-    return patient_dict
+    for lab_row in lab_data[1:]:
+        lab_info = lab_row.strip("\n").split(delimiter)
+        lab_table = cur.execute(
+            "INSERT INTO"
+            " labs(PatientID,AdmissionID,LabName,LabValue,LabUnits,LabDateTime)"
+            " VALUES (?,?,?,?,?,?)",
+            lab_info,
+        )
+
+    con.commit()
+    cur.close()
 
 
-def num_older_than(age: float, patient_dict: Dict[str, Patient]) -> int:
-    """Returns the number of patients who are older than a given age (in years).
+def date_time(date_time_field: List[tuple]) -> datetime:
+    """Converts a string to a datetime object."""
+    return datetime.strptime(date_time_field[0][0], "%Y-%m-%d %H:%M:%S.%f")
 
-    Computational Complexity: Assuming `N` is the number of patients, we iterate
-    over the dictionary once and initialize each patient, which takes N time. We
-    then check the age of each of the initialized patients is greater than the given
-    age, which also takes N time. Finally, incrementing the counter takes N time.
-    Our big-O notation is therefore 3N, and after dropping the constant factor, we
-    are left with O(N) time complexity.
-    """
-    num_older = 0
-    for patient in patient_dict.values():
-        if patient.age > age:
-            num_older += 1
-    return num_older
+
+def age(patient_id: str, database: str) -> float:
+    """Returns the age of a patient."""
+    con = sqlite3.connect(database)
+    cur = con.cursor()
+    date_of_birth = cur.execute(
+        "SELECT PatientDateofBirth FROM patients WHERE PatientID = ?", (patient_id,)
+    ).fetchall()
+    DOB = date_time(date_of_birth)
+    age = round((datetime.today() - DOB).days / 365.25, 2)
+    con.close()
+    return age
+
+
+def age_at_admis(patient_id: str, database: str) -> float:
+    """Returns the age of a patient at first admission."""
+    con = sqlite3.connect(database)
+    cur = con.cursor()
+    date_of_lab = cur.execute(
+        "SELECT min(LabDateTime) FROM labs WHERE PatientID = ?", (patient_id,)
+    ).fetchall()
+    date_of_birth = cur.execute(
+        "SELECT PatientDateofBirth FROM patients WHERE PatientID = ?", (patient_id,)
+    ).fetchall()
+    lab_date = date_time(date_of_lab)
+    DOB = date_time(date_of_birth)
+    age_at_admis = round((lab_date - DOB).days / 365.25, 2)
+    con.close()
+    return age_at_admis
+
+
+def num_older_than(given_age: float, database: str) -> int:
+    """Returns the number of patients who are older than a given age (in years)."""
+    con = sqlite3.connect(database)
+    cur = con.cursor()
+    patient_ids = cur.execute("SELECT DISTINCT PatientID FROM patients").fetchall()
+    ages = []
+    for i in range(len(patient_ids)):
+        patient_age = age(patient_ids[i][0], database)
+        if patient_age > given_age:
+            ages.append(patient_age)
+    return len(ages)
 
 
 def sick_patients(
-    lab: str, gt_lt: str, value: float, patient_dict: Dict[str, Patient]
-) -> Set(list):
+    lab: str, gt_lt: str, value: float, database: str
+) -> List[str]:
     """Returns a (unique) list of patients who have a given test with value
-    above (">") or below ("<") a given level.
-
-    Computational Complexity: Assuming `N` is the number of patients and
-    `M` is the average number of labs per patient, we iterate over the length of the
-    dictionary once and initialize each patient, which takes N time. This is followed
-    by another iteration over all the labs of the initialized patients, giving us N*M
-    time complexity.  The next three "if" statements all take constant time,
-    but each operation need to be repeated for each N*M, because we are inside the for
-    loops, resulting in 4(N*M).  We repeat a similar process in the elif operation
-    which adds an additional 3(N*M) to the total. Finally, we look through the set of
-    unique labs which takes constant time. Our resulting big-O notation is
-    O((N*M)+4(N*M)+3(N*M)+N). After dropping the constant factor, we yield O(N*M)
-    time complexity.
-    """
-    sick_patients = set()
-    labs = set()
-    for patient in patient_dict.values():
-        for i in range(len(patient.labs)):
-            labs.add(patient.labs[i].lab_name)
-            if lab == patient.labs[i].lab_name:
-                if gt_lt == ">":
-                    if float(patient.labs[i].value) > value:
-                        sick_patients.add(patient)
-                elif gt_lt == "<":
-                    if float(patient.labs[i].value) < value:
-                        sick_patients.add(patient)
-                else:
-                    raise ValueError("Please enter a valid operator")
-    if lab not in labs:
-        raise ValueError("Please enter a valid lab name")
+    above (">") or below ("<") a given level."""
+    con = sqlite3.connect(database)
+    cur = con.cursor()
+    if gt_lt == ">":
+        sick_patients = cur.execute(
+            "SELECT DISTINCT PatientID FROM labs WHERE LabName = ? AND LabValue > ?",
+            (lab, value),
+        ).fetchall()
+    elif gt_lt == "<":
+        sick_patients = cur.execute(
+            "SELECT DISTINCT PatientID FROM labs WHERE LabName = ? AND LabValue < ?",
+            (lab, value),
+        ).fetchall()
+    else:
+        raise ValueError("Please enter a valid operator")
+    con.close()
     return sick_patients
 
 
 if __name__ == "__main__":
-    patient_dict = parse_data(
-        "PatientCorePopulatedTable.txt", "LabsCorePopulatedTable.txt", "\t"
+    parse_data(
+        "SampleDB.db",
+        "PatientSampleData.txt",
+        "LabsSampleData.txt",
+        "\t",
     )
+
